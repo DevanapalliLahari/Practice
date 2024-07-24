@@ -5,70 +5,57 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
+//Dijkstra's Algorithm in Java
+
 public class Dijkstras {
-    static class Edge {
-        int firstVertex;
-        int secondVertex;
-        int weight;
 
-        Edge(int firstVertex, int secondVertex, int weight) {
-            this.firstVertex = firstVertex;
-            this.secondVertex = secondVertex;
-            this.weight = weight;
-        }
-    }
+public static void dijkstra(int[][] graph, int source) {
+ int count = graph.length;
+ boolean[] visitedVertex = new boolean[count];
+ int[] distance = new int[count];
+ for (int i = 0; i < count; i++) {
+   visitedVertex[i] = false;
+   distance[i] = Integer.MAX_VALUE;
+ }
 
-    static class Pair implements Comparable<Pair> {
-        int vertex;
-        String pathOfTheSourceNode;
-        int weightOfThePath;
+ // Distance of self loop is zero
+ distance[source] = 0;
+ for (int i = 0; i < count; i++) {
 
-        public Pair(int vertex, String pathOfTheSourceNode, int weightOfThePath) {
-            this.vertex = vertex;
-            this.pathOfTheSourceNode = pathOfTheSourceNode;
-            this.weightOfThePath = weightOfThePath;
-        }
+   // Update the distance between neighbouring vertex and source vertex
+   int u = findMinDistance(distance, visitedVertex);
+   visitedVertex[u] = true;
 
-        @Override
-        public int compareTo(Pair other) {
-            return Integer.compare(this.weightOfThePath, other.weightOfThePath);
-        }
-    }
+   // Update all the neighbouring vertex distances
+   for (int v = 0; v < count; v++) {
+     if (!visitedVertex[v] && graph[u][v] != 0 && (distance[u] + graph[u][v] < distance[v])) {
+       distance[v] = distance[u] + graph[u][v];
+     }
+   }
+ }
+ for (int i = 0; i < distance.length; i++) {
+   System.out.println(String.format("Distance from %s to %s is %s", source, i, distance[i]));
+ }
 
-    public static void main(String[] args) throws Exception {
-        BufferedReader bufferReader = new BufferedReader(new InputStreamReader(System.in));
-        int vertices = Integer.parseInt(bufferReader.readLine());
-        ArrayList<Edge>[] graph = new ArrayList[vertices + 1];
-        for (int i = 0; i <= vertices; i++) {
-            graph[i] = new ArrayList<>();
-        }
-        int edge = Integer.parseInt(bufferReader.readLine());
-        for (int i = 0; i < edge; i++) {
-            String[] part = bufferReader.readLine().split(" ");
-            int firstVertex = Integer.parseInt(part[0]);
-            int secondVertex = Integer.parseInt(part[1]);
-            int weight = Integer.parseInt(part[2]);
-            graph[firstVertex].add(new Edge(firstVertex, secondVertex, weight));
-            graph[secondVertex].add(new Edge(secondVertex, firstVertex, weight));
-        }
-        int sourceVertex = Integer.parseInt(bufferReader.readLine());
-        boolean[] visited = new boolean[vertices + 1];
-        PriorityQueue<Pair> priorityQueue = new PriorityQueue<>();
-        priorityQueue.add(new Pair(sourceVertex, sourceVertex + " ", 0));
+}
 
-        while (!priorityQueue.isEmpty()) {
-            Pair current = priorityQueue.remove();
-            if (visited[current.vertex]) {
-                continue;
-            }
-            visited[current.vertex] = true;
-            System.out.println(current.vertex + " via " + current.pathOfTheSourceNode + " @ " + current.weightOfThePath);
+// Finding the minimum distance
+private static int findMinDistance(int[] distance, boolean[] visitedVertex) {
+ int minDistance = Integer.MAX_VALUE;
+ int minDistanceVertex = -1;
+ for (int i = 0; i < distance.length; i++) {
+   if (!visitedVertex[i] && distance[i] < minDistance) {
+     minDistance = distance[i];
+     minDistanceVertex = i;
+   }
+ }
+ return minDistanceVertex;
+}
 
-            for (Edge edgeObj : graph[current.vertex]) {
-                if (!visited[edgeObj.secondVertex]) {
-                    priorityQueue.add(new Pair(edgeObj.secondVertex, current.pathOfTheSourceNode + " --> " + edgeObj.secondVertex, current.weightOfThePath + edgeObj.weight));
-                }
-            }
-        }
-    }
+public static void main(String[] args) {
+ int graph[][] = new int[][] { { 0, 0, 1, 2, 0, 0, 0 }, { 0, 0, 2, 0, 0, 3, 0 }, { 1, 2, 0, 1, 3, 0, 0 },
+     { 2, 0, 1, 0, 0, 0, 1 }, { 0, 0, 3, 0, 0, 2, 0 }, { 0, 3, 0, 0, 2, 0, 1 }, { 0, 0, 0, 1, 0, 1, 0 } };
+ Dijkstras T = new Dijkstras();
+ T.dijkstra(graph, 0);
+}
 }
